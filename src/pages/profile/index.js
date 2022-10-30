@@ -63,6 +63,8 @@ const Profile = ({role}) => {
     }
   }
 
+  // console.log(user);
+
   const formatData = (traitements) => {
     let data = [];
     let formatedData = {};
@@ -109,27 +111,28 @@ const Profile = ({role}) => {
         res = await getHospitalServices(token, user?._id);
       } else if (user.OwnRole === "company") {
         res = await getCompanyServices(token, user?._id);
-      }
+      } else 
+        return ;
       
-       if (res.status === 200) {
-         if ((user.OwnRole === "patient" || user.OwnRole === "person") &&  res.data.lastyearDose >= 18)
-           enqueueSnackbar(user.firstName + " " + user.lastName + " Have exceeded The Does Rate Limit.", {variant: 'warning'})
+      if (res.status === 200) {
+        if ((user.OwnRole === "patient" || user.OwnRole === "person") &&  res.data?.lastyearDose >= 18)
+          enqueueSnackbar(user.cin + " Have exceeded The Does Rate Limit.", {variant: 'warning'})
         if (user.OwnRole === "patient")
           formatData(res?.data?.data);
         else if (user.OwnRole === "person")
           formatData(res?.data?.traitements);
         else if (user.OwnRole === "hospital")
-          formatData(res?.data.data.data);
+          formatData(res?.data?.data?.data);
         else if (user.OwnRole === "company"){
-          formatDataCompany(res?.data.data);
+          formatDataCompany(res?.data?.data);
         }
         else 
           setMainPageData([]);
         setDoseData(res.data);
-       }
-       setDataLoading(false);
+      }
+      setDataLoading(false);
     } catch (e) {
-      enqueueSnackbar(e.response.data.message || 'Something Went Wrong..', {variant: 'error'})
+      enqueueSnackbar(e?.response?.data?.message || 'Something Went Wrong..', {variant: 'error'})
     }
    }
 
@@ -158,7 +161,6 @@ const Profile = ({role}) => {
     getDoses();
     getGraph();
   }, []);
-
 
   return (
     <div>
@@ -229,13 +231,13 @@ const Profile = ({role}) => {
                     </div>}
                     {user.OwnRole === "person" && 
                       <div className="detailItem">
-                        <span className="itemKey">{user.company ? "Company" : "Hospital"}:</span>
+                        <span className="itemKey">{user.company ? "Company" : user.hospital ? "Hospital" : ""}:</span>
                         <span className="itemValue">
                           {
                             user.company ? 
                             ((typeof user.company === 'object' && user.company !== null) ? user.company?.designation : user.company)
                               : 
-                              user.hospital
+                              typeof user.hospital === 'object' && user.hospital !== null ? user.hospital?.name : user.hospital
                           }
                           </span>
                       </div>
