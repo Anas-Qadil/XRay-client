@@ -288,14 +288,11 @@ export const getHospitalPersons = async (token, search) => {
 }
 
 export const getGraphData = async (token, type) => {
-  return await axios.get(`${links.localhost}/api/graph`, {
+  return await axios.post(`${links.localhost}/api/graph`, { type }, {
     headers: {
       Accept: "application/json",
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
-    },
-    params: {
-      type,
     },
   })
 }
