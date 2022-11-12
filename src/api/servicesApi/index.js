@@ -254,17 +254,16 @@ export const getAllTraitementApi = async (token) => {
 }
 
 export const getUltimateStatisticsApi = async (token, stats) => {
-  return await axios.get(`${links.localhost}/api/admin/ultimate-statistics`,{
+  return await axios.post(`${links.localhost}/api/admin/ultimate-statistics`, {stats},{
     headers: {
       Accept: "application/json",
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    params: {
-      stats,
-    },
   })
 }
+
+
 export const AddServiceAPI = async (token, data) => {
   return await axios.post(`${links.localhost}/api/hospital/add-service`, {data}, {
     headers: {
