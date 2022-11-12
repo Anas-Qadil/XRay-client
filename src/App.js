@@ -49,6 +49,7 @@ function App() {
         data: data,
         token: data.token,
       }
+      console.log("main was here");
       // fill redux store with user data
       dispatch(setData(payload));
       // put token to local storage
@@ -59,6 +60,10 @@ function App() {
       navigate(`/${data?.user?.role}`);
       setLoading(false);
     } catch (e) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      navigate('/');
+      setLoading(false);
       enqueueSnackbar(e?.response?.data?.message || 'Something Went Wrong..', {variant: 'error'})
     }
   }
