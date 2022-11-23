@@ -10,14 +10,16 @@ import { signUpCompany } from "../../api/authApi/signUp";
 import { useSnackbar } from 'notistack'
 
 const CreateCompany = ({role}) => {
-
+  
   const { enqueueSnackbar } = useSnackbar()
+  const [btnLoading, setBtnLoading] = useState(false);
   const navigate = useNavigate();
   const token = useSelector(state => state?.data?.token);
   const [error, setError] = useState({
     username: false,
     password: false,
     region: false,
+    address: false,
     ville: false,
     designation: false,
     email: false,
@@ -28,6 +30,7 @@ const CreateCompany = ({role}) => {
     password: '',
     region: '',
     ville: '',
+    address: '',
     designation: '',
     email: '',
     phone: '',
@@ -36,6 +39,7 @@ const CreateCompany = ({role}) => {
 
   const addCompany =  async () => {
     try {
+      setBtnLoading(true);
       if (!checkCompany(companyData, setError)) {
         const res = await signUpCompany(token, companyData);
         if (res.status === 200 || res.status === 201) {
@@ -45,8 +49,10 @@ const CreateCompany = ({role}) => {
       } else {
         enqueueSnackbar('Please Check your inputs', {variant: 'error'})
       }
+      setBtnLoading(false);
     } catch (e) {
       enqueueSnackbar(e.response.data.message || 'Something Went Wrong..', {variant: 'error'})
+      setBtnLoading(false);
     }
   }
 
@@ -54,33 +60,33 @@ const CreateCompany = ({role}) => {
 		<>
       <div style={{display: "flex"}}>
         <FormControl color="primary" fullWidth style={{marginBottom: "20px"}}>
-          <InputLabel htmlFor="my-input" error={error.username}>Username</InputLabel>
+          <InputLabel htmlFor="my-input" error={error.designation}>Designation</InputLabel>
           <Input type="text" id="my-input" 
-            error={error.username}
+            error={error.designation}
             aria-describedby="my-helper-text" 
             style={{width: "90%"}}
-            value={companyData.username}
+            value={companyData.designation}
             onChange={(e) => {
               setError({
                 ...error,
-                username: false,
+                designation: false,
               });
-              setCompanyData({...companyData, username: e.target.value})}}
+              setCompanyData({...companyData, designation: e.target.value})}}
           />
         </FormControl>
         <FormControl color="primary" fullWidth style={{marginBottom: "20px"}}>
-          <InputLabel htmlFor="my-input" error={error.password}>Password</InputLabel>
+          <InputLabel htmlFor="my-input" error={error.address}>Address</InputLabel>
           <Input type="text" id="my-input" 
-            error={error.password}
+            error={error.address}
             aria-describedby="my-helper-text" 
-            style={{width: "90%"}}
-            value={companyData.password}
+            style={{width: "95%"}} 
+            value={companyData.address}
             onChange={(e) => {
               setError({
                 ...error,
-                password: false,
+                address: false,
               });
-              setCompanyData({...companyData, password: e.target.value})}}
+              setCompanyData({...companyData, address: e.target.value})}}
           />
         </FormControl>
       </div>
@@ -118,18 +124,18 @@ const CreateCompany = ({role}) => {
       </div>
       <div style={{display: "flex"}}>
         <FormControl color="primary" fullWidth style={{marginBottom: "20px"}}>
-          <InputLabel htmlFor="my-input" error={error.designation}>DESIGNATION</InputLabel>
+          <InputLabel htmlFor="my-input" error={error.email}>EMAIL</InputLabel>
           <Input type="text" id="my-input" 
-            error={error.designation}
+            error={error.email}
             aria-describedby="my-helper-text" 
-            style={{width: "90%"}}
-            value={companyData.designation}
+            style={{width: "95%"}} 
+            value={companyData.email}
             onChange={(e) => {
               setError({
                 ...error,
-                designation: false,
+                email: false,
               });
-              setCompanyData({...companyData, designation: e.target.value})}}
+              setCompanyData({...companyData, email: e.target.value})}}
           />
         </FormControl>
         <FormControl color="primary" fullWidth style={{marginBottom: "20px"}}>
@@ -150,24 +156,41 @@ const CreateCompany = ({role}) => {
       </div>
       <div style={{display: "flex"}}>
         <FormControl color="primary" fullWidth style={{marginBottom: "20px"}}>
-          <InputLabel htmlFor="my-input" error={error.email}>EMAIL</InputLabel>
+          <InputLabel htmlFor="my-input" error={error.username}>Username</InputLabel>
           <Input type="text" id="my-input" 
-            error={error.email}
+            error={error.username}
             aria-describedby="my-helper-text" 
-            style={{width: "95%"}} 
-            value={companyData.email}
+            style={{width: "90%"}}
+            value={companyData.username}
             onChange={(e) => {
               setError({
                 ...error,
-                email: false,
+                username: false,
               });
-              setCompanyData({...companyData, email: e.target.value})}}
+              setCompanyData({...companyData, username: e.target.value})}}
+          />
+        </FormControl>
+        <FormControl color="primary" fullWidth style={{marginBottom: "20px"}}>
+          <InputLabel htmlFor="my-input" error={error.password}>Password</InputLabel>
+          <Input type="text" id="my-input" 
+            error={error.password}
+            aria-describedby="my-helper-text" 
+            style={{width: "90%"}}
+            value={companyData.password}
+            onChange={(e) => {
+              setError({
+                ...error,
+                password: false,
+              });
+              setCompanyData({...companyData, password: e.target.value})}}
           />
         </FormControl>
       </div>
-      <Stack style={{marginTop: "50px"}} spacing={2} direction="row">
+      <Stack style={{marginTop: "10px"}} spacing={2} direction="row">
         <Button variant="outlined" onClick={() => navigate(`/${role}`)} fullWidth>Cancel</Button>
-        <Button variant="contained" onClick={addCompany} fullWidth>Add Company</Button>
+        <Button disabled={btnLoading} variant="contained" onClick={addCompany} fullWidth>
+          Add Company
+        </Button>
       </Stack>
 		</>
   );

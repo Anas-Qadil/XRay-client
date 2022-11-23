@@ -68,9 +68,9 @@ const Sidebar = ({role}) => {
               <li>
                 <CreditCardIcon className="icon" />
                 {(role === "admin") && <span>Global Statistics</span>}
-                {(role === "company") && <span>Statistics Of Your Persons</span>}
-                {(role === "hospital") && <span>Statistics Of Your Patients</span>}
-                {(role === "person" || role === "patient") && <span>Your Statistics</span>}
+                {(role === "company") && <span>Statistics</span>}
+                {(role === "hospital") && <span>Statistics</span>}
+                {(role === "person" || role === "patient") && <span>Statistics</span>}
               </li>
             </Link>
             
@@ -121,19 +121,19 @@ const Sidebar = ({role}) => {
               <Link to="/admin/hospitals" style={{ textDecoration: "none" }}>
                 <li>
                   <LocalHospitalIcon className="icon" />
-                  <span>Hospitals</span>
+                  <span>Health Insitution</span>
                 </li>
               </Link>
             )}
           <p className="title">Action</p>
-          {(role === "admin" || role === "hospital" || role === "company") && (
+          {/* {(role === "admin" || role === "hospital" || role === "company") && ( */}
             <Link to="/update" style={{ textDecoration: "none" }}>
               <li>
                 <SettingsIcon className="icon" />
                 <span>Update</span>
               </li>
             </Link>
-          )}
+          {/* )} */}
           {(role === "admin" || role === "hospital") && (
             <Link to="/add-service" style={{ textDecoration: "none" }}>
               <li>

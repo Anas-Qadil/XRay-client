@@ -9,17 +9,19 @@ import { Container } from '@mui/material';
 import { FormControl, InputLabel, Input, FormHelperText, Select, MenuItem } from '@mui/material';
 import { useNavigate } from "react-router-dom";
 import UpdateAdmin from './updateAdmin';
+import PersonalInformation from "./personalInformations";
+
 
 const Update = ({role}) => {
 
   const navigate = useNavigate();
-  const [updateType, setUpdateType] = useState('person'); // patient or person
+  const [updateType, setUpdateType] = useState(role === "patient" ? "patient" : "person"); // patient or person
 
-  useEffect(() => {
-    if (role === "patient" || role === "person") {
-      navigate(`/${role}`);
-    }
-  }, []);
+  // useEffect(() => {
+  //   // if (role === "patient" || role === "person") {
+  //   //   navigate(`/${role}`);
+  //   // }
+  // }, []);
 
 	return (
     <div className="home">
@@ -27,10 +29,7 @@ const Update = ({role}) => {
       <div className="homeContainer">
       <Container  component={Paper} maxWidth="md" style={{marginTop: "40px", paddingBottom: "60px"}}>
         <h1 style={{display: "flex", justifyContent: "center"}}>Update Information</h1>
-        <br />
-        <br />
-        <br />
-        <FormControl fullWidth style={{marginBottom: "20px"}}>
+        {role !== "patient" && role !== "person" && <FormControl fullWidth style={{marginBottom: "20px"}}>
           <InputLabel id="demo-simple-select-label">Update</InputLabel>
           <Select
             labelId="demo-simple-select-label"
@@ -41,20 +40,19 @@ const Update = ({role}) => {
           >
             {(role === "admin") && <MenuItem value="patient">Patient</MenuItem>}
             {(role === "admin" || role === "hospital" || role === "company") && <MenuItem value="person">Professional Healthcare</MenuItem>}
-            {role === "admin" && <MenuItem value="hospital">Hospital</MenuItem>}
+            {(role === "hospital" || role === "company") && <MenuItem value="personalInformation">Personal Information</MenuItem>}
+            {role === "admin" && <MenuItem value="hospital">Health Institution</MenuItem>}
             {role === "admin" && <MenuItem value="company">Company</MenuItem>}
             {role === "admin" && <MenuItem value="admin">Admin</MenuItem>}
           </Select>
-        </FormControl>
-        <br />
-        <br />
-        <hr />
-        <br />
+        </FormControl>}
         {updateType === "person" && <UpdatePerson role={role} />}
         {updateType === "patient" && <UpdatePatient role={role}  />}
         {updateType === "hospital" && <UpdateHospital role={role} />}
         {updateType === "company" && <UpdateCompany role={role} />}
         {updateType === "admin" && <UpdateAdmin role={role} />}
+        {updateType === "personalInformation" && role === "hospital" && <UpdateHospital role={role} />}
+        {updateType === "personalInformation" && role === "company" && <UpdateCompany role={role} />}
       </Container>
       </div>
     </div>
@@ -62,3 +60,4 @@ const Update = ({role}) => {
 }
 
 export default Update;
+

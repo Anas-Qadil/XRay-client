@@ -22,14 +22,13 @@ import { getPersonTraitements, getHospitalServices, getCompanyServices, getAllTr
 const Profile = ({role}) => {
 
   const token = useSelector(state => state?.data?.token);
-  const userRDX = useSelector(state => state?.data?.data?.user);
+  const userRDX = useSelector(state => state?.data?.user);
   const location = useLocation();
   const [graph, setGraph] = useState({});
   const { enqueueSnackbar } = useSnackbar();
   const locationData = location?.state?.data || {};
   const [mainPageData, setMainPageData] = useState([]);
   const [DataLoading, setDataLoading] = useState(true);
-  let labels = ["Date", "CIN", "Service", "Examen", "Equipement", "Hopital", "Dose"];
   // data
   const [doseData, setDoseData] = useState([]);
   // check if locationData is empty
@@ -63,7 +62,6 @@ const Profile = ({role}) => {
     }
   }
 
-  // console.log(user);
 
   const formatData = (traitements) => {
     let data = [];
@@ -77,7 +75,7 @@ const Profile = ({role}) => {
         service: traitements[size - i]?.service?.name,
         examen: traitements[size - i]?.service?.examen,
         equipement: traitements[size - i]?.service?.equipment,
-        hopital: traitements[size - i]?.service?.hospital?.name,
+        hopital: traitements[size - i]?.service?.hospital?.designation,
         dose: traitements[size - i]?.dose,
       }
       data.push(formatedData);
@@ -156,7 +154,8 @@ const Profile = ({role}) => {
     }
     setMainPageData(data);
   }
-
+  
+  console.log(locationData);
   useEffect(() => {
     getDoses();
     getGraph();
@@ -169,7 +168,7 @@ const Profile = ({role}) => {
         <div className="singleContainer">
           <div className="top">
             <div className="left">
-              <div className="editButton">{user?.OwnRole === "person" ? "Professional Healthcare" : user?.OwnRole }</div>
+              <div className="editButton">{user?.OwnRole === "person" ? "Professional Healthcare" : user?.OwnRole === "hospital" ? "Health Institution" : user?.OwnRole }</div>
               <h1 className="title">Information</h1>
               <div className="item">
                 <img
@@ -231,13 +230,13 @@ const Profile = ({role}) => {
                     </div>}
                     {user.OwnRole === "person" && 
                       <div className="detailItem">
-                        <span className="itemKey">{user.company ? "Company" : user.hospital ? "Hospital" : ""}:</span>
+                        <span className="itemKey">{user.company ? "Company" : user.hospital || user?.hospital?.type ? "Health Institution" : ""}:</span>
                         <span className="itemValue">
                           {
                             user.company ? 
                             ((typeof user.company === 'object' && user.company !== null) ? user.company?.designation : user.company)
                               : 
-                              typeof user.hospital === 'object' && user.hospital !== null ? user.hospital?.name : user.hospital
+                              typeof user.hospital === 'object' && user.hospital !== null ? user.hospital?.designation : user.hospital
                           }
                           </span>
                       </div>
@@ -246,11 +245,11 @@ const Profile = ({role}) => {
                 }
                 { (user.OwnRole === "hospital" || user.OwnRole === "company") && 
                   <div className="details">
-                    <h1 className="itemTitle">{user.designation}</h1>
-                    {user.OwnRole === "hospital" && <div className="detailItem">
-                      <span className="itemKey">Hospital name:</span>
-                      <span className="itemValue">{user.name}</span>
-                    </div>}
+                    <h1 className="itemTitle">{user.OwnRole === "hospital" ? "Health Institution" : "Company"}</h1>
+                    <div className="detailItem">
+                      <span className="itemKey">Designation:</span>
+                      <span className="itemValue">{user.designation}</span>
+                    </div>
                     <div className="detailItem">
                       <span className="itemKey">Region:</span>
                       <span className="itemValue">{user.region}</span>
@@ -262,6 +261,10 @@ const Profile = ({role}) => {
                     {user.phone && <div className="detailItem">
                       <span className="itemKey">phone:</span>
                       <span className="itemValue">{user.phone}</span>
+                    </div>}
+                    {user.address && <div className="detailItem">
+                      <span className="itemKey">address:</span>
+                      <span className="itemValue">{user.address}</span>
                     </div>}
                     {user.email && <div className="detailItem">
                       <span className="itemKey">Email:</span>
@@ -296,10 +299,6 @@ const Profile = ({role}) => {
               <Chart aspect={3 / 1} title="User Dose ( LastYear)" color={doseData?.lastyearDose >= 18 ? "#df4759" : "#00A7E1"} graph={graph} />
             </div>
           </div>
-          {user.OwnRole !== "admin" && <div className="bottom">
-          <h1 className="title">services</h1>
-            <Table data={mainPageData} labels={labels} DataLoading={DataLoading}  />
-          </div>}
         </div>
       </div>
     </div>

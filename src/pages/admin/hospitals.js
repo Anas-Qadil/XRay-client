@@ -10,6 +10,7 @@ import { getAllHospitals, deleteHospitalAPI } from "../../api/servicesApi";
 import { useSnackbar } from 'notistack'
 import Model from "../../components/popups/index";
 import validateSearchInput from "../../utils/searchValidate";
+import moment from "moment";
 
 const Hospitals = ({role}) => {
 
@@ -18,7 +19,7 @@ const Hospitals = ({role}) => {
   const token = useSelector(state => state?.data?.token);
   const [search, setSearch] = useState("");
   const [hospitals, setHospitals] = useState([]);
-  const labels = ["ID", "Name", "Region", "Ville", "Statut", "Designation", "Phone", "Email", "Action"]
+  const labels = ["ID", "Created At", "Designation", "Region", "Ville", "Statut", "Phone", "Email", "Action"]
   const [dataLoading, setDataLoading] = React.useState(true);
 
   // model
@@ -40,11 +41,11 @@ const Hospitals = ({role}) => {
         hospitalsData.push({
           id: i,
           _id: hospital._id,
-          name: hospital.name,
+          createdAt: moment(hospital.createdAt).format("YYYY-MM-DD HH:mm"),
+          designation: hospital.designation,
           region: hospital.region,
           ville: hospital.ville,
           statut: hospital.statut,
-          designation: hospital.designation,
           phone: hospital.phone,
           email: hospital.email,
           action: <IconButton style={{zIndex: "100"}} onClick={() => checkDelete(hospital?._id)} aria-label="delete" size="large">
@@ -63,7 +64,7 @@ const Hospitals = ({role}) => {
     try {
       const res = await deleteHospitalAPI(token, id);
       if (res.status === 200) {
-        enqueueSnackbar(res.data.message, {variant: 'success'})
+        enqueueSnackbar("Deleted Successfully", {variant: 'success'})
         getHospitals();
       }
     } catch (e) {

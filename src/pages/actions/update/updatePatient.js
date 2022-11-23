@@ -16,12 +16,17 @@ import { getPatientForHospitlRole, getPatients, getUserPatient } from "../../../
 import Autocomplete from '@mui/material/Autocomplete';
 import { checkUpdatePatientData } from "../../../utils/checkPatient";
 import { updatePatientData } from "../../../api/update";
+import { useDispatch } from "react-redux";
+import { setData } from "../../../store";
 
 const UpdatePatient = ({role}) => {
 
   const { enqueueSnackbar } = useSnackbar()
 
   const token = useSelector(state => state?.data?.token);
+  const user = useSelector(state => state?.data?.user);
+  const dispatch = useDispatch();
+
   const navigate = useNavigate();
   const [error, setError] = React.useState({
     username: false,
@@ -96,6 +101,14 @@ const UpdatePatient = ({role}) => {
       if (res.status !== 200)
         return enqueueSnackbar("Error while updating patient", {variant: "error"});
       enqueueSnackbar("Patient updated successfully", {variant: "success"});
+
+      if (role === "patient") {
+        const newUser = Object.assign({}, user);
+        newUser.username = patientData.username;
+        newUser.patient = patientData;
+        delete newUser.patient.password;
+        dispatch(setData({user: newUser}));
+      }
       navigate(`/${role}`);
     } catch (e) {
       enqueueSnackbar(e?.response?.data?.message || 'Something Went Wrong..', {variant: 'error'})
@@ -103,15 +116,34 @@ const UpdatePatient = ({role}) => {
   }
 
   useEffect(() => {
-    getPatients_();
-    if (patientData?._id)
-      getPatientUser(patientData?._id);
+    if (role === "patient") {
+      setPatientData({
+        ...patientData,
+        username: user.username,
+        password: '',
+        firstName: user.patient.firstName,
+        lastName: user.patient.lastName,
+        cin: user.patient.cin,
+        gender: user.patient.gender,
+        birthDate: user.patient.birthDate,
+        age: user.patient.age,
+        address: user.patient.address,
+        phone: user.patient.phone,
+        email: user.patient.email,
+        poids: user.patient.poids,
+        _id: user.patient._id,
+      });
+    } else {
+      getPatients_();
+      if (patientData?._id)
+        getPatientUser(patientData?._id);
+    }
   }, [patientData._id]);
   
 
 	return (
 	<div>
-    <Autocomplete
+    {role !== "patient" && <Autocomplete
       style={{marginBottom: "20px"}}
       disablePortal
       id="combo-box-demo"
@@ -151,7 +183,170 @@ const UpdatePatient = ({role}) => {
         });
       }}
       renderInput={(params) => <TextField {...params} label="Patients" />}
-    />
+    />}
+    <div style={{display: "flex"}}>
+      <FormControl disabled={role === "patient" && true} color="primary" fullWidth style={{marginBottom: "20px"}}>
+        <InputLabel htmlFor="my-input" error={error.firstName} >First Name</InputLabel>
+        <Input type="text" id="my-input" 
+          error={error.firstName}
+          aria-describedby="my-helper-text" 
+          style={{width: "90%"}} 
+          value={patientData.firstName}
+          onChange={(e) => {
+            setError({...error, firstName: false});
+            if (role !== "patient") 
+              setPatientData({...patientData, firstName: e.target.value})}}
+        />
+      </FormControl>
+      <FormControl disabled={role === "patient" && true} color="primary" fullWidth style={{marginBottom: "20px"}}>
+        <InputLabel htmlFor="my-input" error={error.lastName}>Last Name</InputLabel>
+        <Input type="text" id="my-input" 
+          error={error.lastName}
+          aria-describedby="my-helper-text" 
+          style={{width: "90%"}}
+          value={patientData.lastName}
+          onChange={(e) => {
+            setError({...error, lastName: false});
+            if (role !== "patient")  
+              setPatientData({...patientData, lastName: e.target.value})}
+          }
+        />
+      </FormControl>
+    </div>
+    <div style={{display: "flex"}}>
+      <FormControl disabled={role === "patient" && true} fullWidth style={{marginBottom: "20px"}}> {/* gender and birthday */}
+        <InputLabel id="demo-simple-select-label" error={error.gender} >Gender</InputLabel>
+        <Select
+          error={error.gender}
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          label="Gender"
+          style={{width: "90%"}}
+          value={patientData.gender}
+          onChange={(e) => {
+            setError({...error, gender: false});
+            if (role !== "patient") 
+              setPatientData({...patientData, gender: e.target.value})}}
+        >
+          <MenuItem value="male">Male</MenuItem>
+          <MenuItem value="female">Female</MenuItem>
+        </Select>
+      </FormControl>
+      <LocalizationProvider  dateAdapter={AdapterDayjs}>
+        <Stack spacing={1} style={{width: "90%", marginRight: "40px"}}>
+          <DesktopDatePicker
+            disabled={role === "patient" && true}
+            label="Date desktop"
+            inputFormat="YYYY-MM-DD"
+            value={patientData.birthDate}
+            onChange={(newValue) => {
+              setError({...error,
+                birthDate: false,
+              });
+              const currentYear = moment().format("YYYY");
+              const age = currentYear - newValue.format("YYYY");
+              if (role !== "patient") 
+                setPatientData({...patientData, 
+                  birthDate: newValue.format("YYYY-MM-DD"),
+                  age: age
+                });
+            }}
+            renderInput={(params) => <TextField {...params} />}
+          />
+        </Stack>
+      </LocalizationProvider>
+    </div>
+    <div style={{display: "flex"}}> {/* phone and age */}
+      <FormControl color="primary" fullWidth style={{marginBottom: "20px"}}>
+        <InputLabel htmlFor="my-input" error={error.phone} >PHONE</InputLabel>
+        <Input type="number" id="my-input" 
+          error={error.phone}
+          aria-describedby="my-helper-text" 
+          style={{width: "90%"}} 
+          value={patientData.phone}
+          onChange={(e) => {
+            setError({...error,
+              phone: false,
+            });
+            setPatientData({...patientData, phone: e.target.value})}
+          }
+        />
+      </FormControl>
+      <FormControl color="primary" fullWidth style={{marginBottom: "20px"}}>
+        <InputLabel htmlFor="my-input" error={error.email}>EMAIL</InputLabel>
+        <Input type="text" id="my-input" 
+          error={error.email}
+          aria-describedby="my-helper-text" 
+          style={{width: "90%"}}
+          value={patientData.email}
+          onChange={(e) => {
+            setError({...error,
+              email: false,
+            });
+            setPatientData({...patientData, email: e.target.value})}
+          }
+        />
+      </FormControl>
+    </div>
+    <div style={{display: "flex"}}>
+      <FormControl disabled={role === "patient" && true} color="primary" fullWidth style={{marginBottom: "20px"}}>
+        <InputLabel htmlFor="my-input" error={error.cin}>CIN</InputLabel>
+        <Input type="text" id="my-input" 
+          error={error.cin}
+          aria-describedby="my-helper-text" 
+          style={{width: "90%"}}
+          value={patientData.cin}
+          onChange={(e) => {
+            setError({...error,
+              cin: false,
+            });
+            if (role !== "patient") 
+              setPatientData({...patientData, cin: e.target.value})}
+          }
+        />
+      </FormControl>
+      <FormControl color="primary" fullWidth style={{marginBottom: "20px"}}>
+        <InputLabel htmlFor="my-input" error={error.address}>ADDRESS</InputLabel>
+        <Input type="text" id="my-input" 
+          error={error.address}
+          aria-describedby="my-helper-text" 
+          style={{width: "90%"}}
+          value={patientData.address}
+          onChange={(e) => {
+            setError({...error,
+              address: false,
+            });
+            setPatientData({...patientData, address: e.target.value})}}
+        />
+      </FormControl>
+    </div>
+    <div style={{display: "flex"}}>
+      <FormControl disabled={role === "patient" && true} color="primary" fullWidth style={{marginBottom: "20px"}}>
+        <InputLabel htmlFor="my-input" error={error.poids}>WEIGHT</InputLabel>
+        <Input type="number" id="my-input" 
+          error={error.poids}
+          aria-describedby="my-helper-text" 
+          style={{width: "90%"}}
+          value={patientData.poids}
+          onChange={(e) => {
+            setError({...error,
+              poids: false,
+            });
+            if (role !== "patient") 
+              setPatientData({...patientData, poids: e.target.value})}
+          }
+
+        />
+      </FormControl>
+      <FormControl color="primary" fullWidth style={{marginBottom: "20px"}} disabled>
+        <InputLabel htmlFor="my-input" error={error.age}>{patientData?.age || "Age"}</InputLabel>
+        <Input type="text" id="my-input" 
+          error={error.age}
+          aria-describedby="my-helper-text" 
+          style={{width: "90%"}} 
+        />
+      </FormControl>
+    </div>
     <div style={{display: "flex"}}>
       <FormControl color="primary" fullWidth style={{marginBottom: "20px"}}>
         <InputLabel htmlFor="my-input" error={error.username} >Username</InputLabel>
@@ -178,164 +373,9 @@ const UpdatePatient = ({role}) => {
         />
       </FormControl>
     </div>
-    <div style={{display: "flex"}}>
-      <FormControl color="primary" fullWidth style={{marginBottom: "20px"}}>
-        <InputLabel htmlFor="my-input" error={error.firstName} >FIRST NAME</InputLabel>
-        <Input type="text" id="my-input" 
-          error={error.firstName}
-          aria-describedby="my-helper-text" 
-          style={{width: "90%"}} 
-          value={patientData.firstName}
-          onChange={(e) => {
-            setError({...error, firstName: false});
-            setPatientData({...patientData, firstName: e.target.value})}}
-        />
-      </FormControl>
-      <FormControl color="primary" fullWidth style={{marginBottom: "20px"}}>
-        <InputLabel htmlFor="my-input" error={error.lastName}>LAST NAME</InputLabel>
-        <Input type="text" id="my-input" 
-          error={error.lastName}
-          aria-describedby="my-helper-text" 
-          style={{width: "90%"}}
-          value={patientData.lastName}
-          onChange={(e) => {
-            setError({...error, lastName: false});
-            setPatientData({...patientData, lastName: e.target.value})}}
-        />
-      </FormControl>
-    </div>
-    <div style={{display: "flex"}}>
-      <FormControl fullWidth style={{marginBottom: "20px"}}> {/* gender and birthday */}
-        <InputLabel id="demo-simple-select-label" error={error.gender} >Gender</InputLabel>
-        <Select
-          error={error.gender}
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          label="Gender"
-          style={{width: "90%"}}
-          value={patientData.gender}
-          onChange={(e) => {
-            setError({...error, gender: false});
-            setPatientData({...patientData, gender: e.target.value})}}
-        >
-          <MenuItem value="male">Male</MenuItem>
-          <MenuItem value="female">Female</MenuItem>
-        </Select>
-      </FormControl>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Stack spacing={1} style={{width: "90%", marginRight: "40px"}}>
-          <DesktopDatePicker
-            label="Date desktop"
-            inputFormat="YYYY-MM-DD"
-            value={patientData.birthDate}
-            onChange={(newValue) => {
-              setError({...error,
-                birthDate: false,
-              });
-              const currentYear = moment().format("YYYY");
-              const age = currentYear - newValue.format("YYYY");
-              setPatientData({...patientData, 
-                birthDate: newValue.format("YYYY-MM-DD"),
-                age: age
-              });
-            }}
-            renderInput={(params) => <TextField {...params} />}
-          />
-        </Stack>
-      </LocalizationProvider>
-    </div>
-    <div style={{display: "flex"}}> {/* phone and age */}
-      <FormControl color="primary" fullWidth style={{marginBottom: "20px"}}>
-        <InputLabel htmlFor="my-input" error={error.phone} >PHONE</InputLabel>
-        <Input type="number" id="my-input" 
-          error={error.phone}
-          aria-describedby="my-helper-text" 
-          style={{width: "90%"}} 
-          value={patientData.phone}
-          onChange={(e) => {
-            setError({...error,
-              phone: false,
-            });
-            setPatientData({...patientData, phone: e.target.value})}
-          }
-        />
-      </FormControl>
-      <FormControl color="primary" fullWidth style={{marginBottom: "20px"}} disabled>
-        <InputLabel htmlFor="my-input" error={error.age}>{patientData?.age || "Age"}</InputLabel>
-        <Input type="text" id="my-input" 
-          error={error.age}
-          aria-describedby="my-helper-text" 
-          style={{width: "90%"}} 
-        />
-      </FormControl>
-    </div>
-    <div style={{display: "flex"}}>
-      <FormControl color="primary" fullWidth style={{marginBottom: "20px"}}>
-        <InputLabel htmlFor="my-input" error={error.address}>ADDRESS</InputLabel>
-        <Input type="text" id="my-input" 
-          error={error.address}
-          aria-describedby="my-helper-text" 
-          style={{width: "90%"}}
-          value={patientData.address}
-          onChange={(e) => {
-            setError({...error,
-              address: false,
-            });
-            setPatientData({...patientData, address: e.target.value})}}
-        />
-      </FormControl>
-      <FormControl color="primary" fullWidth style={{marginBottom: "20px"}}>
-        <InputLabel htmlFor="my-input" error={error.email}>EMAIL</InputLabel>
-        <Input type="text" id="my-input" 
-          error={error.email}
-          aria-describedby="my-helper-text" 
-          style={{width: "90%"}}
-          value={patientData.email}
-          onChange={(e) => {
-            setError({...error,
-              email: false,
-            });
-            setPatientData({...patientData, email: e.target.value})}
-          }
-        />
-      </FormControl>
-    </div>
-    <div style={{display: "flex"}}>
-      <FormControl color="primary" fullWidth style={{marginBottom: "20px"}}>
-        <InputLabel htmlFor="my-input" error={error.cin}>CIN</InputLabel>
-        <Input type="text" id="my-input" 
-          error={error.cin}
-          aria-describedby="my-helper-text" 
-          style={{width: "90%"}}
-          value={patientData.cin}
-          onChange={(e) => {
-            setError({...error,
-              cin: false,
-            });
-            setPatientData({...patientData, cin: e.target.value})}
-          }
-        />
-      </FormControl>
-      <FormControl color="primary" fullWidth style={{marginBottom: "20px"}}>
-        <InputLabel htmlFor="my-input" error={error.poids}>POIDS</InputLabel>
-        <Input type="number" id="my-input" 
-          error={error.poids}
-          aria-describedby="my-helper-text" 
-          style={{width: "90%"}}
-          value={patientData.poids}
-          onChange={(e) => {
-            setError({...error,
-              poids: false,
-            });
-            setPatientData({...patientData, poids: e.target.value})}
-          }
-
-        />
-      </FormControl>
-    </div>
-    <Stack style={{marginTop: "50px"}} spacing={2} direction="row">
+    <Stack style={{marginTop: "10px"}} spacing={2} direction="row">
       <Button variant="outlined" onClick={() => navigate(`/${role}`)} fullWidth>Cancel</Button>
-      <Button variant="contained" onClick={updatePatient} fullWidth>Update Patient</Button>
+      <Button variant="contained" onClick={updatePatient} fullWidth>Update</Button>
     </Stack>
 	</div>
   );

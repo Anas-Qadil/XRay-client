@@ -13,16 +13,19 @@ import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-const List = ({data, labels, DataLoading}) => {
+const List = ({data, labels, DataLoading, style}) => {
 
   const location = useLocation();
   const navigate = useNavigate();
   const paths = location.pathname.split("/");
   const userRDX = useSelector(state => state?.data?.data?.user);
-  // console.log(data);
 
   return ( 
     <TableContainer component={Paper} className="table"
+      style={style ? {
+        maxHeight: "calc(50vh)", overflow: "auto",
+        axWidth: "calc(100vw)", overflow: "auto"
+      } : {maxWidth: "calc(100vw)", overflow: "auto"}}
     >
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead style={{backgroundColor: "#18a6df", color: "white"}}>
@@ -37,7 +40,7 @@ const List = ({data, labels, DataLoading}) => {
             data?.map((row) => (
               <TableRow className="tableRowHover" key={row?.id} >
                 {Object?.keys(row)?.map((key, index) => {
-                    if (key === "_id" || key === "_company" || key === "_hospital")
+                    if (key === "_id" || key === "_company" || key === "_hospital" || key === "__address" || key === "__email")
                       return ;
                     return (<TableCell 
                       className="tableCell" 
@@ -52,6 +55,7 @@ const List = ({data, labels, DataLoading}) => {
                           obj.phone = row?.phone;
                           obj.region = row?.region;
                           obj.ville = row?.ville;
+                          obj.address = row?.address;
                           obj.role = userRDX.role;
                           obj.OwnRole = "company";
                         } else if (paths[paths.length - 1] === "patients") {

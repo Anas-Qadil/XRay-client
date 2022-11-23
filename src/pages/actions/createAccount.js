@@ -21,31 +21,33 @@ const CreateAccount = ({role}) => {
       {/* <Navbar /> */}
       <Container  component={Paper} maxWidth="md" style={{marginTop: "40px", paddingBottom: "60px"}}>
         <h1 style={{display: "flex", justifyContent: "center"}}>Create Account</h1>
-        <br />
-        <br />
-        <br />
-        <FormControl fullWidth style={{marginBottom: "20px"}}>
-          <InputLabel id="demo-simple-select-label">Account Type</InputLabel>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={accountType}
-            onChange={(e) => setAccountType(e.target.value)}
-            label="Account Type"
-          >
-            {(role === "admin" || role === "hospital") && <MenuItem value="patient">Patient</MenuItem>}
-            {(role === "admin" || role === "hospital" || role === "company") && <MenuItem value="person">Professional Healthcare</MenuItem>}
-            {role === "admin" && <MenuItem value="hospital">Hospital</MenuItem>}
-            {role === "admin" && <MenuItem value="company">Company</MenuItem>}
-          </Select>
-        </FormControl>
-        <br />
+        { role !== "company" &&
+          <FormControl fullWidth style={{marginBottom: "20px"}}>
+            <InputLabel id="demo-simple-select-label">Account Type</InputLabel>
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={accountType}
+              onChange={(e) => setAccountType(e.target.value)}
+              label="Account Type"
+            >
+              {(role === "admin" || role === "hospital") && <MenuItem value="patient">Patient</MenuItem>}
+              {(role === "admin" || role === "hospital" || role === "company") && <MenuItem value="person">Professional Healthcare</MenuItem>}
+              {role === "admin" && <MenuItem value="company">Company</MenuItem>}
+              {role === "admin" && <MenuItem value="hospital">Hospital</MenuItem>}
+              {role === "admin" && <MenuItem value="radio">Radiology Center</MenuItem>}
+              {role === "admin" && <MenuItem value="clinic">Clinic</MenuItem>}
+            </Select>
+          </FormControl>
+        }
         <br />
         <hr />
         <br />
         {accountType === "person" && <CreatePerson role={role} />}
         {accountType === "patient" && <CreatePatient role={role}  />}
-        {accountType === "hospital" && <CreateHospital role={role} />}
+        {accountType === "hospital" && <CreateHospital role={role} type="hospital" />}
+        {accountType === "radio" && <CreateHospital role={role} type="radio" />}
+        {accountType === "clinic" && <CreateHospital role={role} type="clinic" />}
         {accountType === "company" && <CreateCompany role={role} />}
       </Container>
       </div>

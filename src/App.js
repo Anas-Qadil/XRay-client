@@ -91,7 +91,7 @@ function App() {
         <Route path="/patient" element={<Patient />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/company" element={<Company />} />
-        <Route path="/hospital" element={<Hospital />} />
+        <Route path="/hospital" element={<Hospital role={role} />} />
         <Route path="/person" element={<Person />} />
         {/* statistics */}
         <Route path="/statistics" element={<Statistics role={role} />} />
